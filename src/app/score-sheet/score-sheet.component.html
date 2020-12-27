@@ -22,7 +22,7 @@
           {{ leftTeam?.name }}
         </mat-header-cell>
         <mat-cell mat-cell *matCellDef="let row">
-          {{ row?.team?.side === "left" ? row?.total : "" }}
+          {{ isLeft(row) ? row?.total : "" }}
         </mat-cell>
       </ng-container>
 
@@ -34,18 +34,11 @@
           mat-cell
           *matCellDef="let row"
           [ngClass]="{
-            win: row?.team?.side === 'left' && row?.delta > 0,
-            loss: row?.team?.side === 'left' && row?.delta < 0
+            win: isLeft(row) && row?.delta > 0,
+            loss: isLeft(row) && row?.delta < 0
           }"
         >
-          {{
-            row?.team?.side === "left" &&
-            row?.total &&
-            row?.win != null &&
-            row?.win != undefined
-              ? printBid(row?.bid)
-              : ""
-          }}
+          {{ isLeft(row) ? printBid(row?.bid) : "" }}
         </mat-cell>
       </ng-container>
 
@@ -57,18 +50,11 @@
           mat-cell
           *matCellDef="let row"
           [ngClass]="{
-            win: row?.team?.side === 'right' && row?.delta > 0,
-            loss: row?.team?.side === 'right' && row?.delta < 0
+            win: isRight(row) && row?.delta > 0,
+            loss: isRight(row) && row?.delta < 0
           }"
         >
-          {{
-            row?.team?.side === "right" &&
-            row?.total &&
-            row?.win != null &&
-            row?.win != undefined
-              ? printBid(row?.bid)
-              : ""
-          }}
+          {{ isRight(row) ? printBid(row?.bid) : "" }}
         </mat-cell>
       </ng-container>
 
@@ -77,7 +63,7 @@
           {{ rightTeam?.name }}
         </mat-header-cell>
         <mat-cell mat-cell *matCellDef="let row">
-          {{ row?.team?.side === "right" ? row?.total : "" }}
+          {{ isRight(row) ? row?.total : "" }}
         </mat-cell>
       </ng-container>
 

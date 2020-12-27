@@ -1,6 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Bid, Hand, Team } from '@model/ScoreRow';
+import { Bid, Hand, Team } from '@model/index';
+import { Store } from '@ngrx/store';
+import { deleteHand, newHand, updateHand } from 'app/game.actions';
+import { GameState } from 'app/game.state';
+import { Observable } from 'rxjs';
+import { scoreToWinLose, printBid } from '../game.utils';
 
 import { DeleteHandDialog } from './delete-hand-dialog/delete-hand-dialog';
 import { TeamNameChangeDialog } from './team-name-change-dialog/team-name-change-dialog';
@@ -11,6 +16,7 @@ import { TeamNameChangeDialog } from './team-name-change-dialog/team-name-change
   styleUrls: ['./score-sheet.component.scss'],
 })
 export class ScoreSheetComponent implements OnInit {
+  game$: Observable<GameState>;
   displayedColumns = [
     'handNo',
     'leftTotal',
@@ -18,122 +24,59 @@ export class ScoreSheetComponent implements OnInit {
     'rightBid',
     'rightTotal',
   ];
-  leftTeam: Team = { name: 'Dream Team', side: 'left' };
-  rightTeam: Team = { name: 'Shit Cunts', side: 'right' };
+  leftTeam: Team;
+  rightTeam: Team;
   selectedRow: Hand = null;
   dataSource: Hand[] = [];
-  //   {
-  //     id: 1,
-  //     team: this.leftTeam,
-  //     delta: 120,
-  //     bid: { hands: 6, suit: 'N' },
-  //     total: 120,
-  //     win: true,
-  //   },
-  //   {
-  //     id: 2,
-  //     team: this.rightTeam,
-  //     delta: -200,
-  //     bid: { hands: 7, suit: 'H' },
-  //     total: -200,
-  //     handsWon: 7,
-  //     win: false,
-  //   },
-  //   {
-  //     id: 3,
-  //     team: this.leftTeam,
-  //     delta: 60,
-  //     bid: { hands: 10, suit: 'C' },
-  //     total: 400,
-  //     win: true,
-  //   },
-  //   {
-  //     id: 4,
-  //     team: this.rightTeam,
-  //     delta: 250,
-  //     handsWon: 10,
-  //     bid: { hands: 7, suit: 'D' },
-  //     total: 120,
-  //     win: true,
-  //   },
-  //   {
-  //     id: 5,
-  //     team: this.rightTeam,
-  //     delta: 120,
-  //     bid: { hands: 6, suit: 'H' },
-  //     total: 120,
-  //     win: true,
-  //   },
-  //   {
-  //     id: 6,
-  //     team: this.leftTeam,
-  //     delta: -200,
-  //     bid: { hands: 7, suit: 'H' },
-  //     total: 340,
-  //     win: false,
-  //   },
-  // ];
-  constructor(private dialog: MatDialog) {}
+
+  constructor(
+    private dialog: MatDialog,
+    private store: Store<{ game: GameState }>
+  ) {
+    this.game$ = store.select('game');
+  }
 
   ngOnInit(): void {
-    this.dataSource = [];
-    this.onNewHandClick();
-  }
-
-  get toWinLoseLeft(): number {
-    const rev = this.dataSource
-      .filter((x) => x.team == this.leftTeam)
-      .reverse();
-    return rev.length > 0
-      ? rev[0].total > 0
-        ? 500 - rev[0].total
-        : -500 - rev[0].total
-      : 0;
-  }
-
-  get toWinLoseRight(): number {
-    const rev = this.dataSource
-      .filter((x) => x.team == this.rightTeam)
-      .reverse();
-    return rev.length > 0
-      ? rev[0].total > 0
-        ? 500 - rev[0].total
-        : -500 - rev[0].total
-      : 0;
-  }
-
-  printBid(bid: Bid) {
-    if (!bid) return null;
-
-    switch (bid.suit) {
-      case 'N':
-        return `${bid.hands}⊗`;
-      case 'H':
-        return `${bid.hands}♡`;
-      case 'D':
-        return `${bid.hands}♢`;
-      case 'C':
-        return `${bid.hands}♧`;
-      case 'S':
-        return `${bid.hands}♤`;
-    }
-  }
-
-  onDeleteClick() {
-    if (this.selectedRow) {
-      const dialogRef = this.dialog.open(DeleteHandDialog, {
-        width: '260px',
-        data: {},
-      });
-      dialogRef.afterClosed().subscribe((result) => {
-        if (result) {
-          this.dataSource = this.dataSource.filter(
-            (x) => x.id !== this.selectedRow.id
-          );
-          this.recalculate();
+    this.game$.subscribe((x) => {
+      this.dataSource = x.hands;
+      this.leftTeam = x.leftTeam;
+      this.rightTeam = x.rightTeam;
+      if (x.hands.length > 0) {
+        this.selectedRow = x.hands.find((x) => x.id === this.selectedRow?.id);
+        if (!this.selectedRow) {
+          this.selectedRow = x.hands[x.hands.length - 1];
         }
-      });
-    }
+      }
+    });
+  }
+
+  isLeft(hand: Hand) {
+    return hand?.team?.name == this.leftTeam?.name && this.isRowValid(hand);
+  }
+  isRight(hand: Hand) {
+    return hand?.team?.name == this.rightTeam?.name && this.isRowValid(hand);
+  }
+
+  get toWinLoseLeft(): string {
+    const rev = this.dataSource
+      .filter((x) => x.team?.name == this.leftTeam?.name)
+      .reverse();
+    return rev.length > 0
+      ? rev[0].total > 0
+        ? scoreToWinLose(500 - rev[0].total)
+        : scoreToWinLose(-500 - rev[0].total)
+      : scoreToWinLose(500);
+  }
+
+  get toWinLoseRight(): string {
+    const rev = this.dataSource
+      .filter((x) => x.team?.name == this.rightTeam?.name)
+      .reverse();
+    return rev.length > 0
+      ? rev[0].total > 0
+        ? scoreToWinLose(500 - rev[0].total)
+        : scoreToWinLose(-500 - rev[0].total)
+      : scoreToWinLose(500);
   }
 
   onTeamNameClick() {
@@ -152,56 +95,6 @@ export class ScoreSheetComponent implements OnInit {
     });
   }
 
-  get selectedTeam(): string {
-    return this.selectedRow?.team?.side;
-  }
-  onTeamChange(team: string) {
-    if (this.selectedRow && team) {
-      this.selectedRow.team = team === 'left' ? this.leftTeam : this.rightTeam;
-    }
-  }
-
-  get selectedHands(): string {
-    return this.selectedRow?.bid?.hands?.toString();
-  }
-  onHandsChange(handCount: string) {
-    if (this.selectedRow && handCount) {
-      if (!this.selectedRow.bid) {
-        this.selectedRow.bid = {};
-      }
-      this.selectedRow.bid.hands = parseInt(handCount);
-    }
-  }
-
-  get selectedSuit(): string {
-    return this.selectedRow?.bid?.suit;
-  }
-  onSuitChange(suit: 'S' | 'C' | 'D' | 'H' | 'N') {
-    if (this.selectedRow && suit) {
-      if (!this.selectedRow.bid) {
-        this.selectedRow.bid = {};
-      }
-      this.selectedRow.bid.suit = suit;
-    }
-  }
-
-  get selectedOutcome(): string {
-    return this.selectedRow?.win?.toString();
-  }
-  onOutcomeChange(outcome: string) {
-    if (this.selectedRow && outcome) {
-      this.selectedRow.win = outcome === 'true';
-    }
-  }
-  get selectedHandsWon(): string {
-    return this.selectedRow?.handsWon?.toString();
-  }
-  onHandsWonChange(handsWon: string) {
-    if (this.selectedRow && handsWon) {
-      this.selectedRow.handsWon = parseInt(handsWon);
-    }
-  }
-
   get isNewHandPermitted() {
     if (this.dataSource.length === 0) return true;
 
@@ -214,61 +107,107 @@ export class ScoreSheetComponent implements OnInit {
       row && row.bid && row.team && (row.win === true || row.win === false)
     );
   }
-
-  recalculate() {
-    let leftTotal = 0;
-    let rightTotal = 0;
-    this.dataSource.forEach((x: Hand) => {
-      if (this.isRowValid(x)) {
-        x.delta = (x.win ? 1 : -1) * this.getBidValue(x.bid);
-        if (x.handsWon === 10 && x.win) {
-          x.delta = Math.max(x.delta, 250);
-        }
-        if (x.team.side === 'left') {
-          leftTotal += x.delta;
-          x.total = leftTotal;
-        } else {
-          rightTotal += x.delta;
-          x.total = rightTotal;
-        }
-      }
-    });
+  
+  printBid(bid: Bid) {
+    return printBid(bid);
   }
 
-  getBidValue(bid: Bid): number {
-    let mod = 0;
-    switch (bid.suit) {
-      case 'N':
-        mod = 20;
-        break;
-      case 'H':
-        mod = 0;
-        break;
-      case 'D':
-        mod = -20;
-        break;
-      case 'C':
-        mod = -40;
-        break;
-      case 'S':
-        mod = -60;
-        break;
+  get selectedTeam(): string {
+    return this.selectedRow?.team == this.leftTeam
+      ? 'left'
+      : this.selectedRow?.team == this.rightTeam
+      ? 'right'
+      : null;
+  }
+  onTeamChange(team: string) {
+    if (this.selectedRow && team) {
+      this.store.dispatch(
+        updateHand({
+          hand: {
+            id: this.selectedRow.id,
+            team: team === 'left' ? this.leftTeam : this.rightTeam,
+          },
+        })
+      );
     }
-    return (bid.hands - 5) * 100 + mod;
+  }
+
+  get selectedHands(): string {
+    return this.selectedRow?.bid?.hands?.toString();
+  }
+  onHandsChange(handCount: string) {
+    if (this.selectedRow) {
+      this.store.dispatch(
+        updateHand({
+          hand: {
+            id: this.selectedRow.id,
+            bid: { hands: parseInt(handCount) },
+          },
+        })
+      );
+    }
+  }
+
+  get selectedSuit(): string {
+    return this.selectedRow?.bid?.suit;
+  }
+  onSuitChange(suit: 'S' | 'C' | 'D' | 'H' | 'N') {
+    if (this.selectedRow && suit) {
+      this.store.dispatch(
+        updateHand({
+          hand: {
+            id: this.selectedRow.id,
+            bid: { suit },
+          },
+        })
+      );
+    }
+  }
+
+  get selectedOutcome(): string {
+    return this.selectedRow?.win?.toString();
+  }
+  onOutcomeChange(outcome: string) {
+    if (this.selectedRow) {
+      this.store.dispatch(
+        updateHand({
+          hand: { id: this.selectedRow.id, win: outcome === 'true' },
+        })
+      );
+    }
+  }
+
+  get selectedHandsWon(): string {
+    return this.selectedRow?.handsWon?.toString();
+  }
+  onHandsWonChange(handsWon: string) {
+    if (this.selectedRow) {
+      this.store.dispatch(
+        updateHand({
+          hand: { id: this.selectedRow.id, handsWon: parseInt(handsWon) },
+        })
+      );
+    }
   }
 
   onNewHandClick() {
-    const maxNo =
-      this.dataSource?.length > 0
-        ? Math.max.apply(
-            Math,
-            this.dataSource.map((o) => o.id)
-          )
-        : 0;
-    this.recalculate();
-    this.dataSource = this.dataSource.concat({
-      id: maxNo + 1,
-    });
-    this.selectedRow = this.dataSource[this.dataSource.length - 1];
+    if (this.isNewHandPermitted) {
+      this.selectedRow = null;
+      this.store.dispatch(newHand());
+    }
+  }
+
+  onDeleteClick() {
+    if (this.selectedRow) {
+      const dialogRef = this.dialog.open(DeleteHandDialog, {
+        width: '260px',
+        data: {},
+      });
+      dialogRef.afterClosed().subscribe((result) => {
+        if (result) {
+          this.store.dispatch(deleteHand({ handId: this.selectedRow.id }));
+        }
+      });
+    }
   }
 }

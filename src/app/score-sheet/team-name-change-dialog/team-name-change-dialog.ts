@@ -1,7 +1,7 @@
 import { Component, Inject } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { Team } from '@model/ScoreRow';
+import { Team } from '@model/index';
 
 @Component({
   selector: 'team-name-change-dialog',
