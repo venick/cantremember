@@ -1,6 +1,6 @@
 import { Hand, Team } from '@model/index';
 import { createReducer, on } from '@ngrx/store';
-import { newHand, deleteHand, updateHand } from './game.actions';
+import { newHand, deleteHand, updateHand, endGame } from './game.actions';
 import { GameState } from './game.state';
 import { bidToScore } from './game.utils';
 
@@ -9,6 +9,20 @@ const initialLeft: Team = {
 };
 const initialRight: Team = {
   name: 'Right Team',
+};
+const initialGameState: GameState = {
+  hands: [
+    {
+      id: 1,
+      bid: { hands: null, suit: null },
+      handsWon: null,
+      team: null,
+      win: null,
+    },
+  ],
+  leftTeam: initialLeft,
+  rightTeam: initialRight,
+  teamList: [initialLeft, initialRight],
 };
 
 const saveSate = (state: GameState) => {
@@ -22,20 +36,7 @@ const loadSate = (): GameState => {
       return gameState;
     }
   } catch {}
-  return {
-    hands: [
-      {
-        id: 1,
-        bid: { hands: null, suit: null },
-        handsWon: null,
-        team: null,
-        win: null,
-      },
-    ],
-    leftTeam: initialLeft,
-    rightTeam: initialRight,
-    teamList: [initialLeft, initialRight],
-  };
+  return initialGameState;
 };
 
 export const initialState: GameState = loadSate();
@@ -58,13 +59,18 @@ const _gameReducer = createReducer(
     return newState;
   }),
 
+  on(endGame, (state) => {
+    saveSate(initialGameState);
+    return { ...initialGameState };
+  }),
+
   on(deleteHand, (state, props) => {
     if (props?.handId) {
       const newState = {
         ...state,
         hands: recalculate(
           state.hands.filter((x) => x.id !== props.handId),
-          state.leftTeam
+          state.leftTeam?.name
         ),
       };
       saveSate(newState);
@@ -104,13 +110,13 @@ const _gameReducer = createReducer(
     const hands: Hand[] = state.hands.map((x) => x);
     hands[index] = hand;
 
-    const newState = { ...state, hands: recalculate(hands, state.leftTeam) };
+    const newState = { ...state, hands: recalculate(hands, state.leftTeam.name) };
     saveSate(newState);
     return newState;
   })
 );
 
-const recalculate = (oldHands: Hand[], leftTeam: Team): Hand[] => {
+const recalculate = (oldHands: Hand[], leftTeamName: string): Hand[] => {
   let leftTotal = 0;
   let rightTotal = 0;
   let hands: Hand[] = [];
@@ -121,7 +127,7 @@ const recalculate = (oldHands: Hand[], leftTeam: Team): Hand[] => {
       if (hand.handsWon === 10 && hand.win) {
         hand.delta = Math.max(hand.delta, 250);
       }
-      if (hand.team.name === leftTeam.name) {
+      if (hand.team?.name === leftTeamName) {
         leftTotal += hand.delta;
         hand.total = leftTotal;
       } else {

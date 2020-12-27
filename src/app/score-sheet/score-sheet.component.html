@@ -151,11 +151,12 @@
       <button
         mat-flat-button
         (click)="onDeleteClick()"
-        [disabled]="!selectedRow"
+        [disabled]="!selectedRow || dataSource.length < 2"
       >
         <mat-icon>delete</mat-icon>
       </button>
       <button
+        *ngIf="!isGameComplete"
         mat-flat-button
         color="primary"
         class="wide"
@@ -163,6 +164,16 @@
         [disabled]="!isNewHandPermitted"
       >
         New Hand
+      </button>
+      <button
+        *ngIf="isGameComplete"
+        mat-flat-button
+        color="primary"
+        class="wide end-game"
+        (click)="onEndGameClick()"
+        [disabled]="!isNewHandPermitted"
+      >
+        Next Game
       </button>
       <button mat-flat-button disabled><mat-icon>history</mat-icon></button>
     </div>

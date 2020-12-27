@@ -6,26 +6,15 @@ export function scoreToWinLose(score: number): string {
 }
 
 export function scoreToBid(score: number): Bid {
+  score = Math.max(score, 40);
   const mod = (score - 40) % 100;
   const hands = Math.floor((score - 40) / 100) + 6;
   let suit: 'S' | 'C' | 'D' | 'H' | 'N' = null;
-  switch (mod) {
-    case 80:
-      suit = 'N';
-      break;
-    case 60:
-      suit = 'H';
-      break;
-    case 40:
-      suit = 'D';
-      break;
-    case 20:
-      suit = 'C';
-      break;
-    case 0:
-      suit = 'S';
-      break;
-  }
+  if (mod > 60) suit = 'N';
+  else if (mod > 40) suit = 'H';
+  else if (mod > 20) suit = 'D';
+  else if (mod > 0) suit = 'C';
+  else suit = 'S';
   return { hands: hands, suit };
 }
 

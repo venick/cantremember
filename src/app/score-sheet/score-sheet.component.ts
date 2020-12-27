@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Bid, Hand, Team } from '@model/index';
 import { Store } from '@ngrx/store';
-import { deleteHand, newHand, updateHand } from 'app/game.actions';
+import { deleteHand, endGame, newHand, updateHand } from 'app/game.actions';
 import { GameState } from 'app/game.state';
 import { Observable } from 'rxjs';
 import { scoreToWinLose, printBid } from '../game.utils';
@@ -61,7 +61,7 @@ export class ScoreSheetComponent implements OnInit {
     const rev = this.dataSource
       .filter((x) => x.team?.name == this.leftTeam?.name)
       .reverse();
-    return rev.length > 0
+    return rev.length > 0 && rev[0].total
       ? rev[0].total > 0
         ? scoreToWinLose(500 - rev[0].total)
         : scoreToWinLose(-500 - rev[0].total)
@@ -72,7 +72,7 @@ export class ScoreSheetComponent implements OnInit {
     const rev = this.dataSource
       .filter((x) => x.team?.name == this.rightTeam?.name)
       .reverse();
-    return rev.length > 0
+    return rev.length > 0 && rev[0].total
       ? rev[0].total > 0
         ? scoreToWinLose(500 - rev[0].total)
         : scoreToWinLose(-500 - rev[0].total)
@@ -89,8 +89,8 @@ export class ScoreSheetComponent implements OnInit {
     });
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
-        this.leftTeam.name = result.left.name ?? 'Left';
-        this.rightTeam.name = result.right.name ?? 'Right';
+        this.leftTeam = result.left.name ?? 'Left';
+        this.rightTeam = result.right.name ?? 'Right';
       }
     });
   }
@@ -104,18 +104,22 @@ export class ScoreSheetComponent implements OnInit {
 
   isRowValid(row: Hand) {
     return (
-      row && row.bid && row.team && (row.win === true || row.win === false)
+      row &&
+      row.bid?.hands &&
+      row.bid?.suit &&
+      row.team &&
+      (row.win === true || row.win === false)
     );
   }
-  
+
   printBid(bid: Bid) {
     return printBid(bid);
   }
 
   get selectedTeam(): string {
-    return this.selectedRow?.team == this.leftTeam
+    return this.selectedRow?.team?.name === this.leftTeam?.name
       ? 'left'
-      : this.selectedRow?.team == this.rightTeam
+      : this.selectedRow?.team?.name === this.rightTeam?.name
       ? 'right'
       : null;
   }
@@ -209,5 +213,23 @@ export class ScoreSheetComponent implements OnInit {
         }
       });
     }
+  }
+
+  get isGameComplete() {
+    return (
+      this.dataSource.findIndex((x) => x.total >= 500 || x.total <= -500) >= 0
+    );
+  }
+
+  onEndGameClick() {
+    const dialogRef = this.dialog.open(DeleteHandDialog, {
+      width: '260px',
+      data: {},
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.store.dispatch(endGame());
+      }
+    });
   }
 }

@@ -3,7 +3,7 @@ mat-table {
   max-width: 100%;
 }
 .content {
-  overflow-y: scroll;
+  margin-bottom: 32px;
 }
 mat-cell,
 mat-header-cell {
@@ -44,11 +44,11 @@ mat-footer-row {
 .loss {
   background-color: rgb(112, 13, 13);
 }
+.end-game
+{
+  background-color:rgb(112, 13, 13);
+}
 .footer {
-  // position: fixed;
-  // left: 0;
-  // bottom: 0;
-  // width: 100%;
   background: #686868;
   color: white;
   text-align: center;
@@ -61,7 +61,7 @@ mat-footer-row {
   min-height: 100vh;
 }
 .content {
-  padding-bottom: 18rem;
+  padding-bottom: 20rem;
 }
 .footer {
   position: fixed;
@@ -70,9 +70,6 @@ mat-footer-row {
   height: 18rem;
 }
 
-// button {
-//   width: 100%;
-// }
 mat-button-toggle-group {
   width: 100%;
   display: flex;
@@ -95,9 +92,7 @@ mat-button-toggle {
 .wide {
   flex-grow: 10;
 }
-// button {
-//   width: unset;
-// }
+
 .selected-row {
   background-color: rgb(85, 84, 84);
 }
