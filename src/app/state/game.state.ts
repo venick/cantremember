@@ -1,8 +1,7 @@
-import { Hand, Team} from '@model/index';
+import { Hand, Team} from '@model/game';
 
 export interface GameState{
     leftTeam: Team;
     rightTeam: Team;
-    teamList: Team[];
     hands: Hand[];
 }

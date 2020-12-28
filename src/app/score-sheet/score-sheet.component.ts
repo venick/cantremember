@@ -1,13 +1,19 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Bid, Hand, Team } from '@model/index';
+import { Bid, Hand, Team } from '@model/game';
 import { Store } from '@ngrx/store';
-import { deleteHand, endGame, newHand, updateHand } from 'app/game.actions';
-import { GameState } from 'app/game.state';
+import {
+  deleteHand,
+  endGame,
+  newHand,
+  updateHand,
+} from 'app/state/game.actions';
+import { GameState } from 'app/state/game.state';
+import { printBid, scoreToWinLose } from 'app/state/game.utils';
 import { Observable } from 'rxjs';
-import { scoreToWinLose, printBid } from '../game.utils';
 
 import { DeleteHandDialog } from './delete-hand-dialog/delete-hand-dialog';
+import { NewGameDialog } from './new-game-dialog/new-game-dialog';
 import { TeamNameChangeDialog } from './team-name-change-dialog/team-name-change-dialog';
 
 @Component({
@@ -222,7 +228,7 @@ export class ScoreSheetComponent implements OnInit {
   }
 
   onEndGameClick() {
-    const dialogRef = this.dialog.open(DeleteHandDialog, {
+    const dialogRef = this.dialog.open(NewGameDialog, {
       width: '260px',
       data: {},
     });

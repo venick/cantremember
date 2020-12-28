@@ -1,4 +1,4 @@
-import { Hand } from '@model/index';
+import { Hand } from '@model/game';
 import { createAction, props } from '@ngrx/store';
 
 export const newHand = createAction('Game-NewHand');

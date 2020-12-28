@@ -1,14 +1,16 @@
-import { Hand, Team } from '@model/index';
+import { Hand, Team } from '@model/game';
 import { createReducer, on } from '@ngrx/store';
 import { newHand, deleteHand, updateHand, endGame } from './game.actions';
 import { GameState } from './game.state';
 import { bidToScore } from './game.utils';
 
 const initialLeft: Team = {
-  name: 'Left Team',
+  name: 'Team 1',
+  players: ['Pleayer 1', 'Player 2']
 };
 const initialRight: Team = {
-  name: 'Right Team',
+  name: 'Team 2',
+  players: ['Pleayer 3', 'Player 4']
 };
 const initialGameState: GameState = {
   hands: [
@@ -22,7 +24,6 @@ const initialGameState: GameState = {
   ],
   leftTeam: initialLeft,
   rightTeam: initialRight,
-  teamList: [initialLeft, initialRight],
 };
 
 const saveSate = (state: GameState) => {

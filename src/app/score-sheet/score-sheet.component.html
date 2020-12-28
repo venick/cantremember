@@ -1,5 +1,5 @@
 <div class="toolbar" role="banner">
-  <mat-icon mat-fab class="logo">memory</mat-icon>
+  <img src="assets/cards.png" class="icon-img" />
   <span>Can't Remember</span>
   <div class="spacer"></div>
   <button mat-icon-button [matMenuTriggerFor]="menu">
@@ -7,6 +7,7 @@
   </button>
   <mat-menu #menu="matMenu">
     <button mat-menu-item (click)="onTeamNameClick()">Team Names</button>
+    <button mat-menu-item (click)="onEndGameClick()">New Game</button>
   </mat-menu>
 </div>
 <div class="container">
@@ -27,9 +28,12 @@
       </ng-container>
 
       <ng-container matColumnDef="leftBid">
-        <mat-header-cell mat-header-cell *matHeaderCellDef>{{
-          toWinLoseLeft
-        }}</mat-header-cell>
+        <mat-header-cell mat-header-cell *matHeaderCellDef>
+          <span>{{ toWinLoseLeft }}</span>
+          <span>{{
+            toWinLoseLeft.startsWith("-") ? "to lose" : "to win"
+          }}</span>
+        </mat-header-cell>
         <mat-cell
           mat-cell
           *matCellDef="let row"
@@ -43,9 +47,12 @@
       </ng-container>
 
       <ng-container matColumnDef="rightBid">
-        <mat-header-cell mat-header-cell *matHeaderCellDef>{{
-          toWinLoseRight
-        }}</mat-header-cell>
+        <mat-header-cell mat-header-cell *matHeaderCellDef>
+          <span>{{ toWinLoseRight }}</span>
+          <span>{{
+            toWinLoseRight.startsWith("-") ? "to lose" : "to win"
+          }}</span>
+        </mat-header-cell>
         <mat-cell
           mat-cell
           *matCellDef="let row"
@@ -67,7 +74,9 @@
         </mat-cell>
       </ng-container>
 
-      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-header-row
+        *matHeaderRowDef="displayedColumns; sticky: true"
+      ></mat-header-row>
       <mat-row
         *matRowDef="let row; columns: displayedColumns"
         (click)="selectedRow = row"

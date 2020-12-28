@@ -1,5 +1,5 @@
-import { Bid } from '@model/index';
-import { Team } from '@model/index';
+import { Bid } from '@model/game';
+import { Team } from '@model/game';
 
 export interface Hand {
   id: number;

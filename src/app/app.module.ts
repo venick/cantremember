@@ -7,17 +7,19 @@ import { StoreModule } from '@ngrx/store';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { gameReducer } from './game.reducer';
 import { MaterialModule } from './material.module';
 import { DeleteHandDialog } from './score-sheet/delete-hand-dialog/delete-hand-dialog';
+import { NewGameDialog } from './score-sheet/new-game-dialog/new-game-dialog';
 import { ScoreSheetComponent } from './score-sheet/score-sheet.component';
 import { TeamNameChangeDialog } from './score-sheet/team-name-change-dialog/team-name-change-dialog';
+import { gameReducer } from './state/game.reducer';
 
 @NgModule({
   declarations: [
     AppComponent,
     ScoreSheetComponent,
     DeleteHandDialog,
+    NewGameDialog,
     TeamNameChangeDialog,
   ],
   imports: [

@@ -1,4 +1,4 @@
-import { Bid } from '@model/index';
+import { Bid } from '@model/game';
 
 export function scoreToWinLose(score: number): string {
   const bid = scoreToBid(score < 0 ? -score : score);
