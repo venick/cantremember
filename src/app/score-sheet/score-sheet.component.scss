@@ -4,7 +4,7 @@
   top: 0;
   width: 100%;
   max-width: 600px;
-  span{
+  span {
     line-height: 44px;
   }
 }
@@ -40,7 +40,7 @@ mat-table {
   max-width: 100%;
   padding-bottom: 40px;
 }
-mat-header-row{
+mat-header-row {
   background-color: #3f3f3f;
 }
 mat-cell,
@@ -159,7 +159,6 @@ mat-button-toggle {
     flex-grow: 10;
   }
 }
-
 .logo {
   transform: scale(1.5);
   padding: 8px 12px;
