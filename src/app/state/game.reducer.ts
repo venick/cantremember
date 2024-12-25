@@ -1,16 +1,16 @@
 import { Hand, Team } from '@model/game';
-import { createReducer, on } from '@ngrx/store';
+import { Action, createReducer, on } from '@ngrx/store';
 import { newHand, deleteHand, updateHand, endGame } from './game.actions';
 import { GameState } from './game.state';
 import { bidToScore } from './game.utils';
 
 const initialLeft: Team = {
   name: 'Team 1',
-  players: ['Pleayer 1', 'Player 2']
+  players: ['Pleayer 1', 'Player 2'],
 };
 const initialRight: Team = {
   name: 'Team 2',
-  players: ['Pleayer 3', 'Player 4']
+  players: ['Pleayer 3', 'Player 4'],
 };
 const initialGameState: GameState = {
   hands: [
@@ -66,7 +66,7 @@ const _gameReducer = createReducer(
   }),
 
   on(deleteHand, (state, props) => {
-    if (props?.handId) {
+    if (!!props?.handId) {
       const newState = {
         ...state,
         hands: recalculate(
@@ -77,9 +77,12 @@ const _gameReducer = createReducer(
       saveSate(newState);
       return newState;
     }
+    return state;
   }),
 
   on(updateHand, (state, props) => {
+    if (!props?.hand) return state;
+
     const newHand = props?.hand;
     let index = state.hands.findIndex((x) => x.id === props.hand.id);
     let hand = state.hands[index];
@@ -111,7 +114,10 @@ const _gameReducer = createReducer(
     const hands: Hand[] = state.hands.map((x) => x);
     hands[index] = hand;
 
-    const newState = { ...state, hands: recalculate(hands, state.leftTeam.name) };
+    const newState = {
+      ...state,
+      hands: recalculate(hands, state.leftTeam.name),
+    };
     saveSate(newState);
     return newState;
   })
@@ -147,6 +153,6 @@ const isHandValid = (hand: Hand) => {
   );
 };
 
-export function gameReducer(state, action) {
+export function gameReducer(state: GameState | undefined, action: Action) {
   return _gameReducer(state, action);
 }

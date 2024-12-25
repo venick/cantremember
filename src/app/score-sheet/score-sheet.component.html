@@ -1,13 +1,17 @@
 <div class="toolbar" role="banner">
-  <img src="assets/cards.png" class="icon-img" />
+  <img src="assets/cards.png" alt="logo" class="icon-img" />
   <span>Can't Remember</span>
   <div class="spacer"></div>
-  <button mat-icon-button [matMenuTriggerFor]="menu">
+  <button mat-icon-button [matMenuTriggerFor]="menu" type="button" class="menu-button" aria-label="menu">
     <mat-icon>more_vert</mat-icon>
   </button>
   <mat-menu #menu="matMenu">
-    <button mat-menu-item (click)="onTeamNameClick()" disabled>Team Names</button>
-    <button mat-menu-item (click)="onEndGameClick()">New Game</button>
+    <button mat-menu-item (click)="onTeamNameClick()" type="button" disabled>
+      Team Names
+    </button>
+    <button mat-menu-item (click)="onEndGameClick()" type="button">
+      New Game
+    </button>
   </mat-menu>
 </div>
 <div class="container">
@@ -90,6 +94,10 @@
         #teamGroup="matButtonToggleGroup"
         [value]="selectedTeam"
         (change)="onTeamChange(teamGroup.value)"
+        [hideSingleSelectionIndicator]="true"
+        appearance="legacy"
+        name="teamSelection"
+        aria-label="team selection"
       >
         <mat-button-toggle value="left">{{ leftTeam?.name }}</mat-button-toggle>
         <mat-button-toggle value="right">{{
@@ -103,6 +111,8 @@
         #handsGroup="matButtonToggleGroup"
         [value]="selectedHands"
         (change)="onHandsChange(handsGroup.value)"
+        [hideSingleSelectionIndicator]="true"
+        appearance="legacy"
       >
         <mat-button-toggle value="6">6</mat-button-toggle>
         <mat-button-toggle value="7">7</mat-button-toggle>
@@ -117,6 +127,8 @@
         #suitGroup="matButtonToggleGroup"
         [value]="selectedSuit"
         (change)="onSuitChange(suitGroup.value)"
+        [hideSingleSelectionIndicator]="true"
+        appearance="legacy"
       >
         <mat-button-toggle value="N">⊗</mat-button-toggle>
         <mat-button-toggle value="H">♡</mat-button-toggle>
@@ -131,6 +143,8 @@
         #outcomeGroup="matButtonToggleGroup"
         [value]="selectedOutcome"
         (change)="onOutcomeChange(outcomeGroup.value)"
+        [hideSingleSelectionIndicator]="true"
+        appearance="legacy"
       >
         <mat-button-toggle value="true">Success</mat-button-toggle>
         <mat-button-toggle value="false">Failure</mat-button-toggle>
@@ -142,6 +156,8 @@
         #handsWonGroup="matButtonToggleGroup"
         [value]="selectedHandsWon"
         (change)="onHandsWonChange(handsWonGroup.value)"
+        [hideSingleSelectionIndicator]="true"
+        appearance="legacy"
       >
         <mat-button-toggle value="0">0</mat-button-toggle>
         <mat-button-toggle value="1">1</mat-button-toggle>
@@ -156,10 +172,12 @@
         <mat-button-toggle value="10">10</mat-button-toggle>
       </mat-button-toggle-group>
     </div>
-    <div class="footer-row">
+    <div class="footer-row controls">
       <button
+        aria-label="delete"
         mat-flat-button
         (click)="onDeleteClick()"
+        type="button"
         [disabled]="!selectedRow || dataSource.length < 2"
       >
         <mat-icon>delete</mat-icon>
@@ -171,6 +189,7 @@
         class="wide"
         (click)="onNewHandClick()"
         [disabled]="!isNewHandPermitted"
+        type="button"
       >
         New Hand
       </button>
@@ -181,10 +200,13 @@
         class="wide end-game"
         (click)="onEndGameClick()"
         [disabled]="!isNewHandPermitted"
+        type="button"
       >
-        Next Game
+        New Game
       </button>
-      <button mat-flat-button disabled><mat-icon>history</mat-icon></button>
+      <button mat-flat-button disabled type="button" aria-label="history">
+        <mat-icon>history</mat-icon>
+      </button>
     </div>
   </div>
 </div>

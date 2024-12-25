@@ -1,4 +1,4 @@
 export interface Bid {
-  hands?: number;
-  suit?: 'S' | 'C' | 'D' | 'H' | 'N';
+  hands?: number | undefined | null;
+  suit?: 'S' | 'C' | 'D' | 'H' | 'N' | undefined | null;
 }

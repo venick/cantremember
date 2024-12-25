@@ -15,11 +15,23 @@ import { Observable } from 'rxjs';
 import { DeleteHandDialog } from './delete-hand-dialog/delete-hand-dialog';
 import { NewGameDialog } from './new-game-dialog/new-game-dialog';
 import { TeamNameChangeDialog } from './team-name-change-dialog/team-name-change-dialog';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTableModule } from '@angular/material/table';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'score-sheet',
   templateUrl: './score-sheet.component.html',
   styleUrls: ['./score-sheet.component.scss'],
+  imports: [
+    CommonModule,
+    MatMenuModule,
+    MatIconModule,
+    MatTableModule,
+    MatButtonToggleModule
+  ]
 })
 export class ScoreSheetComponent implements OnInit {
   game$: Observable<GameState>;
@@ -30,9 +42,9 @@ export class ScoreSheetComponent implements OnInit {
     'rightBid',
     'rightTotal',
   ];
-  leftTeam: Team;
-  rightTeam: Team;
-  selectedRow: Hand = null;
+  leftTeam: Team | undefined;
+  rightTeam: Team | undefined;
+  selectedRow: Hand | null | undefined = null;
   dataSource: Hand[] = [];
 
   constructor(
@@ -122,7 +134,7 @@ export class ScoreSheetComponent implements OnInit {
     return printBid(bid);
   }
 
-  get selectedTeam(): string {
+  get selectedTeam(): string | null {
     return this.selectedRow?.team?.name === this.leftTeam?.name
       ? 'left'
       : this.selectedRow?.team?.name === this.rightTeam?.name
@@ -142,7 +154,7 @@ export class ScoreSheetComponent implements OnInit {
     }
   }
 
-  get selectedHands(): string {
+  get selectedHands(): string | undefined {
     return this.selectedRow?.bid?.hands?.toString();
   }
   onHandsChange(handCount: string) {
@@ -158,7 +170,7 @@ export class ScoreSheetComponent implements OnInit {
     }
   }
 
-  get selectedSuit(): string {
+  get selectedSuit(): string | undefined | null {
     return this.selectedRow?.bid?.suit;
   }
   onSuitChange(suit: 'S' | 'C' | 'D' | 'H' | 'N') {
@@ -174,7 +186,7 @@ export class ScoreSheetComponent implements OnInit {
     }
   }
 
-  get selectedOutcome(): string {
+  get selectedOutcome(): string | undefined {
     return this.selectedRow?.win?.toString();
   }
   onOutcomeChange(outcome: string) {
@@ -187,7 +199,7 @@ export class ScoreSheetComponent implements OnInit {
     }
   }
 
-  get selectedHandsWon(): string {
+  get selectedHandsWon(): string | undefined {
     return this.selectedRow?.handsWon?.toString();
   }
   onHandsWonChange(handsWon: string) {
@@ -209,13 +221,14 @@ export class ScoreSheetComponent implements OnInit {
 
   onDeleteClick() {
     if (this.selectedRow) {
+      const thisSelectedRow = this.selectedRow;
       const dialogRef = this.dialog.open(DeleteHandDialog, {
         width: '260px',
         data: {},
       });
       dialogRef.afterClosed().subscribe((result) => {
         if (result) {
-          this.store.dispatch(deleteHand({ handId: this.selectedRow.id }));
+          this.store.dispatch(deleteHand({ handId: thisSelectedRow.id }));
         }
       });
     }
@@ -223,7 +236,9 @@ export class ScoreSheetComponent implements OnInit {
 
   get isGameComplete() {
     return (
-      this.dataSource.findIndex((x) => x.total >= 500 || x.total <= -500) >= 0
+      this.dataSource.findIndex(
+        (x) => !!x.total && (x.total >= 500 || x.total <= -500)
+      ) >= 0
     );
   }
 

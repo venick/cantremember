@@ -9,7 +9,7 @@ export function scoreToBid(score: number): Bid {
   score = Math.max(score, 40);
   const mod = (score - 40) % 100;
   const hands = Math.floor((score - 40) / 100) + 6;
-  let suit: 'S' | 'C' | 'D' | 'H' | 'N' = null;
+  let suit: 'S' | 'C' | 'D' | 'H' | 'N' | undefined = undefined;
   if (mod > 60) suit = 'N';
   else if (mod > 40) suit = 'H';
   else if (mod > 20) suit = 'D';
@@ -18,7 +18,9 @@ export function scoreToBid(score: number): Bid {
   return { hands: hands, suit };
 }
 
-export function bidToScore(bid: Bid): number {
+export function bidToScore(bid: Bid | null | undefined): number {
+  if (!bid || !bid.hands || !bid.suit) return 0;
+
   let mod = 0;
   switch (bid.suit) {
     case 'N':
@@ -41,7 +43,7 @@ export function bidToScore(bid: Bid): number {
 }
 
 export function printBid(bid: Bid): string {
-  if (!bid || !bid.hands || !bid.suit) return null;
+  if (!bid || !bid.hands || !bid.suit) return '';
 
   switch (bid.suit) {
     case 'N':

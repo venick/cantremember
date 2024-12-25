@@ -1,9 +1,12 @@
 import { Component } from '@angular/core';
+import { ScoreSheetComponent } from './score-sheet/score-sheet.component';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrl: './app.component.scss',
+  imports: [ScoreSheetComponent],
+  providers: [],
 })
 export class AppComponent {
   title = "Can't Remember";
