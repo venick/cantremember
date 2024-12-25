@@ -7,6 +7,7 @@ import {
   endGame,
   newHand,
   updateHand,
+  updateTeams,
 } from 'app/state/game.actions';
 import { GameState } from 'app/state/game.state';
 import { printBid, scoreToWinLose } from 'app/state/game.utils';
@@ -30,8 +31,8 @@ import { CommonModule } from '@angular/common';
     MatMenuModule,
     MatIconModule,
     MatTableModule,
-    MatButtonToggleModule
-  ]
+    MatButtonToggleModule,
+  ],
 })
 export class ScoreSheetComponent implements OnInit {
   game$: Observable<GameState>;
@@ -69,15 +70,15 @@ export class ScoreSheetComponent implements OnInit {
   }
 
   isLeft(hand: Hand) {
-    return hand?.team?.name == this.leftTeam?.name && this.isRowValid(hand);
+    return hand?.team?.id == this.leftTeam?.id && this.isRowValid(hand);
   }
   isRight(hand: Hand) {
-    return hand?.team?.name == this.rightTeam?.name && this.isRowValid(hand);
+    return hand?.team?.id == this.rightTeam?.id && this.isRowValid(hand);
   }
 
   get toWinLoseLeft(): string {
     const rev = this.dataSource
-      .filter((x) => x.team?.name == this.leftTeam?.name)
+      .filter((x) => x.team?.id == this.leftTeam?.id)
       .reverse();
     return rev.length > 0 && rev[0].total
       ? rev[0].total > 0
@@ -88,7 +89,7 @@ export class ScoreSheetComponent implements OnInit {
 
   get toWinLoseRight(): string {
     const rev = this.dataSource
-      .filter((x) => x.team?.name == this.rightTeam?.name)
+      .filter((x) => x.team?.id == this.rightTeam?.id)
       .reverse();
     return rev.length > 0 && rev[0].total
       ? rev[0].total > 0
@@ -99,7 +100,7 @@ export class ScoreSheetComponent implements OnInit {
 
   onTeamNameClick() {
     const dialogRef = this.dialog.open(TeamNameChangeDialog, {
-      width: '260px',
+      width: '290px',
       data: {
         left: this.leftTeam,
         right: this.rightTeam,
@@ -107,8 +108,7 @@ export class ScoreSheetComponent implements OnInit {
     });
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
-        this.leftTeam = result.left.name ?? 'Left';
-        this.rightTeam = result.right.name ?? 'Right';
+        this.store.dispatch(updateTeams(result));
       }
     });
   }
@@ -135,9 +135,9 @@ export class ScoreSheetComponent implements OnInit {
   }
 
   get selectedTeam(): string | null {
-    return this.selectedRow?.team?.name === this.leftTeam?.name
+    return this.selectedRow?.team?.id === this.leftTeam?.id
       ? 'left'
-      : this.selectedRow?.team?.name === this.rightTeam?.name
+      : this.selectedRow?.team?.id === this.rightTeam?.id
       ? 'right'
       : null;
   }

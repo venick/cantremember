@@ -1,4 +1,4 @@
-import { Hand } from '@model/game';
+import { HandUpdate, Team } from '@model/game';
 import { createAction, props } from '@ngrx/store';
 
 export const newHand = createAction('Game-NewHand');
@@ -9,5 +9,9 @@ export const deleteHand = createAction(
 );
 export const updateHand = createAction(
   'Game-UpdateHand',
-  props<{ hand: Hand }>()
+  props<{ hand: HandUpdate }>()
+);
+export const updateTeams = createAction(
+  'Game-UpdateTeams',
+  props<{ left: Team; right: Team }>()
 );

@@ -1,18 +1,27 @@
-import { Hand, Team } from '@model/game';
+import { Hand, HandUpdate, Team } from '@model/game';
 import { Action, createReducer, on } from '@ngrx/store';
-import { newHand, deleteHand, updateHand, endGame } from './game.actions';
+import {
+  newHand,
+  deleteHand,
+  updateHand,
+  endGame,
+  updateTeams,
+} from './game.actions';
 import { GameState } from './game.state';
 import { bidToScore } from './game.utils';
 
 const initialLeft: Team = {
+  id: 'l1',
   name: 'Team 1',
-  players: ['Pleayer 1', 'Player 2'],
 };
 const initialRight: Team = {
+  id: 'r1',
   name: 'Team 2',
-  players: ['Pleayer 3', 'Player 4'],
 };
 const initialGameState: GameState = {
+  deviceId: 'did' + new Date().getTime() / 2,
+  gameId: 'gid' + new Date().getTime(),
+  gameStarted: new Date(),
   hands: [
     {
       id: 1,
@@ -20,6 +29,8 @@ const initialGameState: GameState = {
       handsWon: null,
       team: null,
       win: null,
+      started: new Date(),
+      ended: null,
     },
   ],
   leftTeam: initialLeft,
@@ -52,17 +63,39 @@ const _gameReducer = createReducer(
             state.hands.map((o) => o.id)
           )
         : 0;
+
+    // copy exisitng hands
+    let newHands = [...state.hands];
+    // end the last hand
+    newHands[newHands.length - 1] = {
+      ...newHands[newHands.length - 1],
+      ended: new Date(),
+    };
+    // add a new blank hand
+    newHands = newHands.concat({
+      id: maxNo + 1,
+      bid: {},
+      started: new Date(),
+      ended: null,
+    });
+
     const newState = {
       ...state,
-      hands: state.hands.concat({ id: maxNo + 1, bid: {} }),
+      hands: newHands,
     };
     saveSate(newState);
     return newState;
   }),
 
   on(endGame, (state) => {
-    saveSate(initialGameState);
-    return { ...initialGameState };
+    const newState = {
+      ...state,
+      hands: initialGameState.hands,
+      gameId: 'gid' + new Date().getTime(),
+      gameStarted: new Date(),
+    };
+    saveSate(newState);
+    return { ...newState };
   }),
 
   on(deleteHand, (state, props) => {
@@ -71,7 +104,7 @@ const _gameReducer = createReducer(
         ...state,
         hands: recalculate(
           state.hands.filter((x) => x.id !== props.handId),
-          state.leftTeam?.name
+          state.leftTeam?.id
         ),
       };
       saveSate(newState);
@@ -80,10 +113,21 @@ const _gameReducer = createReducer(
     return state;
   }),
 
+  on(updateTeams, (state, props) => {
+    if (!props?.left || !props?.right) return state;
+    const newState = {
+      ...state,
+      leftTeam: props.left,
+      rightTeam: props.right,
+    };
+    saveSate(newState);
+    return newState;
+  }),
+
   on(updateHand, (state, props) => {
     if (!props?.hand) return state;
 
-    const newHand = props?.hand;
+    const newHand: HandUpdate = props?.hand;
     let index = state.hands.findIndex((x) => x.id === props.hand.id);
     let hand = state.hands[index];
 
@@ -116,14 +160,14 @@ const _gameReducer = createReducer(
 
     const newState = {
       ...state,
-      hands: recalculate(hands, state.leftTeam.name),
+      hands: recalculate(hands, state.leftTeam.id),
     };
     saveSate(newState);
     return newState;
   })
 );
 
-const recalculate = (oldHands: Hand[], leftTeamName: string): Hand[] => {
+const recalculate = (oldHands: Hand[], leftTeamId: string): Hand[] => {
   let leftTotal = 0;
   let rightTotal = 0;
   let hands: Hand[] = [];
@@ -134,7 +178,7 @@ const recalculate = (oldHands: Hand[], leftTeamName: string): Hand[] => {
       if (hand.handsWon === 10 && hand.win) {
         hand.delta = Math.max(hand.delta, 250);
       }
-      if (hand.team?.name === leftTeamName) {
+      if (hand.team?.id === leftTeamId) {
         leftTotal += hand.delta;
         hand.total = leftTotal;
       } else {

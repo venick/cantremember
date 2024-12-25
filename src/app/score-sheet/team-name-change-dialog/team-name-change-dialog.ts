@@ -31,8 +31,21 @@ export class TeamNameChangeDialog {
     @Inject(MAT_DIALOG_DATA) public data: { left: Team; right: Team }
   ) {
     this.form = new FormGroup({
-      leftTeam: new FormControl(data?.left?.name, Validators.minLength(1)),
-      rightTeam: new FormControl(data?.right?.name),
+      leftTeam: new FormControl(
+        data?.left?.name || '',
+        Validators.minLength(1)
+      ),
+      rightTeam: new FormControl(
+        data?.right?.name || '',
+        Validators.minLength(1)
+      ),
     });
+  }
+
+  get formData(): { left: Team; right: Team } {
+    return {
+      left: { ...this.data?.left, name: this.form.value.leftTeam },
+      right: { ...this.data?.right, name: this.form.value.rightTeam },
+    };
   }
 }

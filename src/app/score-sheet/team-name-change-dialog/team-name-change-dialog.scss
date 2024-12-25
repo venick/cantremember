@@ -1,5 +1,18 @@
-.mat-dialog-actions {
+mat-form-field {
+  width: 100%;
+}
+.container {
+  padding: 4px;
+}
+
+.mat-mdc-dialog-actions {
+  margin-top: 16px;
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
+  button {
+    line-height: 28px;
+    margin-left: 16px;
+    padding: 6px 16px;
+  }
 }
